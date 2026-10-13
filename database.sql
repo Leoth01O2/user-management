@@ -62,3 +62,39 @@ CREATE TABLE IF NOT EXISTS Employee (
     created_Date DATETIME,
     PRIMARY KEY (id)
 );
+
+
+DROP PROCEDURE IF EXISTS get_all_users;
+DELIMITER $$
+CREATE PROCEDURE get_all_users()
+BEGIN
+    SELECT id, name, email, country
+    FROM users;
+END$$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS update_user;
+DELIMITER $$
+CREATE PROCEDURE update_user(
+    IN user_id INT,
+    IN user_name VARCHAR(120),
+    IN user_email VARCHAR(220),
+    IN user_country VARCHAR(120)
+)
+BEGIN
+    UPDATE users
+    SET name = user_name,
+        email = user_email,
+        country = user_country
+    WHERE id = user_id;
+END$$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS delete_user;
+DELIMITER $$
+CREATE PROCEDURE delete_user(IN user_id INT)
+BEGIN
+    DELETE FROM users
+    WHERE id = user_id;
+END$$
+DELIMITER ;
