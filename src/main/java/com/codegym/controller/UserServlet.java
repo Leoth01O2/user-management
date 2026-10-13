@@ -112,7 +112,7 @@ public class UserServlet extends HttpServlet {
 
     private void listUser(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException, ServletException {
-        List<User> listUser = userDAO.selectAllUsersStore();
+        List<User> listUser = userDAO.selectAllUsers();
         request.setAttribute("listUser", listUser);
         forwardList(request, response);
     }
@@ -190,14 +190,14 @@ public class UserServlet extends HttpServlet {
         String country = request.getParameter("country");
 
         User user = new User(id, name, email, country);
-        userDAO.updateUserStore(user);
+        userDAO.updateUser(user);
         response.sendRedirect(request.getContextPath() + "/users");
     }
 
     private void deleteUser(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        userDAO.deleteUserStore(id);
+        userDAO.deleteUser(id);
         response.sendRedirect(request.getContextPath() + "/users");
     }
 }

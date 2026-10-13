@@ -92,36 +92,51 @@ public class UserDAO implements IUserDAO {
 
     @Override
     public List<User> selectAllUsers() {
-        return getUsers(SELECT_ALL_USERS);
+        List<User> users = new ArrayList<>();
+        String query = "{CALL get_all_users()}";
+
+        try (Connection connection = getConnection();
+             CallableStatement callableStatement = connection.prepareCall(query);
+             ResultSet rs = callableStatement.executeQuery()) {
+
+            while (rs.next()) {
+                users.add(new User(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("email"),
+                        rs.getString("country")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return users;
     }
 
     @Override
     public boolean deleteUser(int id) throws SQLException {
-        boolean rowDeleted;
+        String query = "{CALL delete_user(?)}";
 
         try (Connection connection = getConnection();
-                PreparedStatement statement = connection.prepareStatement(DELETE_USERS_SQL)) {
-            statement.setInt(1, id);
-            rowDeleted = statement.executeUpdate() > 0;
+             CallableStatement callableStatement = connection.prepareCall(query)) {
+            callableStatement.setInt(1, id);
+            return callableStatement.executeUpdate() > 0;
         }
-
-        return rowDeleted;
     }
 
     @Override
     public boolean updateUser(User user) throws SQLException {
-        boolean rowUpdated;
+        String query = "{CALL update_user(?, ?, ?, ?)}";
 
         try (Connection connection = getConnection();
-                PreparedStatement statement = connection.prepareStatement(UPDATE_USERS_SQL)) {
-            statement.setString(1, user.getName());
-            statement.setString(2, user.getEmail());
-            statement.setString(3, user.getCountry());
-            statement.setInt(4, user.getId());
-            rowUpdated = statement.executeUpdate() > 0;
+             CallableStatement callableStatement = connection.prepareCall(query)) {
+            callableStatement.setInt(1, user.getId());
+            callableStatement.setString(2, user.getName());
+            callableStatement.setString(3, user.getEmail());
+            callableStatement.setString(4, user.getCountry());
+            return callableStatement.executeUpdate() > 0;
         }
-
-        return rowUpdated;
     }
 
     @Override
