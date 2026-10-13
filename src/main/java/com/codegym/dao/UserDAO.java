@@ -191,6 +191,59 @@ public class UserDAO implements IUserDAO {
     }
 
 
+
+    @Override
+    public List<User> selectAllUsersStore() {
+        List<User> users = new ArrayList<>();
+        String query = "{CALL get_all_users()}";
+
+        try (Connection connection = getConnection();
+             CallableStatement callableStatement = connection.prepareCall(query);
+             ResultSet rs = callableStatement.executeQuery()) {
+
+            while (rs.next()) {
+                users.add(new User(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("email"),
+                        rs.getString("country")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return users;
+    }
+
+    @Override
+    public boolean updateUserStore(User user) throws SQLException {
+        String query = "{CALL update_user(?, ?, ?, ?)}";
+
+        try (Connection connection = getConnection();
+             CallableStatement callableStatement = connection.prepareCall(query)) {
+
+            callableStatement.setInt(1, user.getId());
+            callableStatement.setString(2, user.getName());
+            callableStatement.setString(3, user.getEmail());
+            callableStatement.setString(4, user.getCountry());
+            return callableStatement.executeUpdate() > 0;
+        }
+    }
+
+    @Override
+    public boolean deleteUserStore(int id) throws SQLException {
+        String query = "{CALL delete_user(?)}";
+
+        try (Connection connection = getConnection();
+             CallableStatement callableStatement = connection.prepareCall(query)) {
+
+            callableStatement.setInt(1, id);
+            return callableStatement.executeUpdate() > 0;
+        }
+    }
+
+
     @Override
     public void addUserTransaction(User user, int[] permissionIds) throws SQLException {
         Connection connection = null;
