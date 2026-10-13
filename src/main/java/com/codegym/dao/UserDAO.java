@@ -171,6 +171,64 @@ public class UserDAO implements IUserDAO {
         }
     }
 
+
+    @Override
+    public void addUserTransaction(User user, int[] permissionIds) throws SQLException {
+        Connection connection = null;
+        PreparedStatement pstmtUser = null;
+        PreparedStatement pstmtAssignment = null;
+        ResultSet rs = null;
+
+        try {
+            connection = getConnection();
+            connection.setAutoCommit(false);
+
+            String insertUserSql = "INSERT INTO users (name, email, country) VALUES (?, ?, ?)";
+            pstmtUser = connection.prepareStatement(insertUserSql, java.sql.Statement.RETURN_GENERATED_KEYS);
+            pstmtUser.setString(1, user.getName());
+            pstmtUser.setString(2, user.getEmail());
+            pstmtUser.setString(3, user.getCountry());
+            pstmtUser.executeUpdate();
+
+            rs = pstmtUser.getGeneratedKeys();
+            int userId = 0;
+            if (rs.next()) {
+                userId = rs.getInt(1);
+            }
+
+            if (permissionIds != null && permissionIds.length > 0) {
+                String insertPermissionSql =
+                        "INSERT INTO user_permission (user_id, permission_id) VALUES (?, ?)";
+                pstmtAssignment = connection.prepareStatement(insertPermissionSql);
+
+                for (int permissionId : permissionIds) {
+                    pstmtAssignment.setInt(1, userId);
+                    pstmtAssignment.setInt(2, permissionId);
+                    pstmtAssignment.executeUpdate();
+                }
+            }
+
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            throw e;
+        } finally {
+            if (rs != null) rs.close();
+            if (pstmtUser != null) pstmtUser.close();
+            if (pstmtAssignment != null) pstmtAssignment.close();
+            if (connection != null) {
+                connection.setAutoCommit(true);
+                connection.close();
+            }
+        }
+    }
+
     private List<User> getUsers(String sql) {
         List<User> users = new ArrayList<>();
 
