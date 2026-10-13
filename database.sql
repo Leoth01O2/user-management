@@ -53,3 +53,12 @@ INSERT IGNORE INTO permission(id, name) VALUES (1, 'add');
 INSERT IGNORE INTO permission(id, name) VALUES (2, 'edit');
 INSERT IGNORE INTO permission(id, name) VALUES (3, 'delete');
 INSERT IGNORE INTO permission(id, name) VALUES (4, 'view');
+
+
+CREATE TABLE IF NOT EXISTS Employee (
+    id INT(3) NOT NULL AUTO_INCREMENT,
+    name VARCHAR(120) NOT NULL,
+    salary INT(220) NOT NULL,
+    created_Date DATETIME,
+    PRIMARY KEY (id)
+);
