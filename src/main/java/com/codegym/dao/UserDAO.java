@@ -14,22 +14,15 @@ import java.util.List;
 public class UserDAO implements IUserDAO {
     private final String jdbcURL = "jdbc:mysql://localhost:3306/demo?useSSL=false&serverTimezone=UTC";
     private final String jdbcUsername = "root";
-    private final String jdbcPassword = "password";
+    private final String jdbcPassword = "[PASSWORD]";
 
-    private static final String INSERT_USERS_SQL =
-            "INSERT INTO users (name, email, country) VALUES (?, ?, ?);";
-    private static final String SELECT_USER_BY_ID =
-            "SELECT id, name, email, country FROM users WHERE id = ?;";
-    private static final String SELECT_ALL_USERS =
-            "SELECT * FROM users;";
-    private static final String DELETE_USERS_SQL =
-            "DELETE FROM users WHERE id = ?;";
-    private static final String UPDATE_USERS_SQL =
-            "UPDATE users SET name = ?, email = ?, country = ? WHERE id = ?;";
-    private static final String SEARCH_BY_COUNTRY_SQL =
-            "SELECT * FROM users WHERE country LIKE ?;";
-    private static final String SORT_BY_NAME_SQL =
-            "SELECT * FROM users ORDER BY name ASC;";
+    private static final String INSERT_USERS_SQL = "INSERT INTO users (name, email, country) VALUES (?, ?, ?);";
+    private static final String SELECT_USER_BY_ID = "SELECT id, name, email, country FROM users WHERE id = ?;";
+    private static final String SELECT_ALL_USERS = "SELECT * FROM users;";
+    private static final String DELETE_USERS_SQL = "DELETE FROM users WHERE id = ?;";
+    private static final String UPDATE_USERS_SQL = "UPDATE users SET name = ?, email = ?, country = ? WHERE id = ?;";
+    private static final String SEARCH_BY_COUNTRY_SQL = "SELECT * FROM users WHERE country LIKE ?;";
+    private static final String SORT_BY_NAME_SQL = "SELECT * FROM users ORDER BY name ASC;";
 
     public UserDAO() {
     }
@@ -48,7 +41,7 @@ public class UserDAO implements IUserDAO {
     @Override
     public void insertUser(User user) throws SQLException {
         try (Connection connection = getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USERS_SQL)) {
+                PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USERS_SQL)) {
             preparedStatement.setString(1, user.getName());
             preparedStatement.setString(2, user.getEmail());
             preparedStatement.setString(3, user.getCountry());
@@ -61,7 +54,7 @@ public class UserDAO implements IUserDAO {
         User user = null;
 
         try (Connection connection = getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_USER_BY_ID)) {
+                PreparedStatement preparedStatement = connection.prepareStatement(SELECT_USER_BY_ID)) {
             preparedStatement.setInt(1, id);
             ResultSet rs = preparedStatement.executeQuery();
 
@@ -88,7 +81,7 @@ public class UserDAO implements IUserDAO {
         boolean rowDeleted;
 
         try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(DELETE_USERS_SQL)) {
+                PreparedStatement statement = connection.prepareStatement(DELETE_USERS_SQL)) {
             statement.setInt(1, id);
             rowDeleted = statement.executeUpdate() > 0;
         }
@@ -101,7 +94,7 @@ public class UserDAO implements IUserDAO {
         boolean rowUpdated;
 
         try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(UPDATE_USERS_SQL)) {
+                PreparedStatement statement = connection.prepareStatement(UPDATE_USERS_SQL)) {
             statement.setString(1, user.getName());
             statement.setString(2, user.getEmail());
             statement.setString(3, user.getCountry());
@@ -117,7 +110,7 @@ public class UserDAO implements IUserDAO {
         List<User> users = new ArrayList<>();
 
         try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(SEARCH_BY_COUNTRY_SQL)) {
+                PreparedStatement statement = connection.prepareStatement(SEARCH_BY_COUNTRY_SQL)) {
             statement.setString(1, "%" + country + "%");
             ResultSet rs = statement.executeQuery();
 
@@ -126,8 +119,7 @@ public class UserDAO implements IUserDAO {
                         rs.getInt("id"),
                         rs.getString("name"),
                         rs.getString("email"),
-                        rs.getString("country")
-                ));
+                        rs.getString("country")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -147,7 +139,7 @@ public class UserDAO implements IUserDAO {
         String query = "{CALL get_user_by_id(?)}";
 
         try (Connection connection = getConnection();
-             CallableStatement callableStatement = connection.prepareCall(query)) {
+                CallableStatement callableStatement = connection.prepareCall(query)) {
 
             callableStatement.setInt(1, id);
             ResultSet rs = callableStatement.executeQuery();
@@ -170,7 +162,7 @@ public class UserDAO implements IUserDAO {
         String query = "{CALL insert_user(?, ?, ?)}";
 
         try (Connection connection = getConnection();
-             CallableStatement callableStatement = connection.prepareCall(query)) {
+                CallableStatement callableStatement = connection.prepareCall(query)) {
 
             callableStatement.setString(1, user.getName());
             callableStatement.setString(2, user.getEmail());
@@ -183,7 +175,7 @@ public class UserDAO implements IUserDAO {
         List<User> users = new ArrayList<>();
 
         try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+                PreparedStatement statement = connection.prepareStatement(sql)) {
             ResultSet rs = statement.executeQuery();
 
             while (rs.next()) {
@@ -191,8 +183,7 @@ public class UserDAO implements IUserDAO {
                         rs.getInt("id"),
                         rs.getString("name"),
                         rs.getString("email"),
-                        rs.getString("country")
-                ));
+                        rs.getString("country")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
