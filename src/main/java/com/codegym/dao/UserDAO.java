@@ -25,6 +25,10 @@ public class UserDAO implements IUserDAO {
             "DELETE FROM users WHERE id = ?;";
     private static final String UPDATE_USERS_SQL =
             "UPDATE users SET name = ?, email = ?, country = ? WHERE id = ?;";
+    private static final String SEARCH_BY_COUNTRY_SQL =
+            "SELECT * FROM users WHERE country LIKE ?;";
+    private static final String SORT_BY_NAME_SQL =
+            "SELECT * FROM users ORDER BY name ASC;";
 
     public UserDAO() {
     }
@@ -75,24 +79,7 @@ public class UserDAO implements IUserDAO {
 
     @Override
     public List<User> selectAllUsers() {
-        List<User> users = new ArrayList<>();
-
-        try (Connection connection = getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_USERS)) {
-            ResultSet rs = preparedStatement.executeQuery();
-
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                String name = rs.getString("name");
-                String email = rs.getString("email");
-                String country = rs.getString("country");
-                users.add(new User(id, name, email, country));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return users;
+        return getUsers(SELECT_ALL_USERS);
     }
 
     @Override
@@ -122,5 +109,56 @@ public class UserDAO implements IUserDAO {
         }
 
         return rowUpdated;
+    }
+
+    @Override
+    public List<User> searchByCountry(String country) {
+        List<User> users = new ArrayList<>();
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(SEARCH_BY_COUNTRY_SQL)) {
+            statement.setString(1, "%" + country + "%");
+            ResultSet rs = statement.executeQuery();
+
+            while (rs.next()) {
+                users.add(new User(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("email"),
+                        rs.getString("country")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return users;
+    }
+
+    @Override
+    public List<User> sortByName() {
+        return getUsers(SORT_BY_NAME_SQL);
+    }
+
+    private List<User> getUsers(String sql) {
+        List<User> users = new ArrayList<>();
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            ResultSet rs = statement.executeQuery();
+
+            while (rs.next()) {
+                users.add(new User(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("email"),
+                        rs.getString("country")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return users;
     }
 }
