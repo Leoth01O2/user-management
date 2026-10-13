@@ -2,6 +2,7 @@ package com.codegym.dao;
 
 import com.codegym.model.User;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -45,7 +46,7 @@ public class UserDAO implements IUserDAO {
     }
 
     @Override
-    public void insertUser(User user) throws Exception {
+    public void insertUser(User user) throws SQLException {
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USERS_SQL)) {
             preparedStatement.setString(1, user.getName());
@@ -83,7 +84,7 @@ public class UserDAO implements IUserDAO {
     }
 
     @Override
-    public boolean deleteUser(int id) throws Exception {
+    public boolean deleteUser(int id) throws SQLException {
         boolean rowDeleted;
 
         try (Connection connection = getConnection();
@@ -96,7 +97,7 @@ public class UserDAO implements IUserDAO {
     }
 
     @Override
-    public boolean updateUser(User user) throws Exception {
+    public boolean updateUser(User user) throws SQLException {
         boolean rowUpdated;
 
         try (Connection connection = getConnection();
@@ -138,6 +139,44 @@ public class UserDAO implements IUserDAO {
     @Override
     public List<User> sortByName() {
         return getUsers(SORT_BY_NAME_SQL);
+    }
+
+    @Override
+    public User getUserById(int id) {
+        User user = null;
+        String query = "{CALL get_user_by_id(?)}";
+
+        try (Connection connection = getConnection();
+             CallableStatement callableStatement = connection.prepareCall(query)) {
+
+            callableStatement.setInt(1, id);
+            ResultSet rs = callableStatement.executeQuery();
+
+            while (rs.next()) {
+                String name = rs.getString("name");
+                String email = rs.getString("email");
+                String country = rs.getString("country");
+                user = new User(id, name, email, country);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return user;
+    }
+
+    @Override
+    public void insertUserStore(User user) throws SQLException {
+        String query = "{CALL insert_user(?, ?, ?)}";
+
+        try (Connection connection = getConnection();
+             CallableStatement callableStatement = connection.prepareCall(query)) {
+
+            callableStatement.setString(1, user.getName());
+            callableStatement.setString(2, user.getEmail());
+            callableStatement.setString(3, user.getCountry());
+            callableStatement.executeUpdate();
+        }
     }
 
     private List<User> getUsers(String sql) {
