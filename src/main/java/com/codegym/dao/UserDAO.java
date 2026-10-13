@@ -271,7 +271,7 @@ public class UserDAO implements IUserDAO {
             connection.setAutoCommit(false);
 
             String insertUserSql = "INSERT INTO users (name, email, country) VALUES (?, ?, ?)";
-            pstmtUser = connection.prepareStatement(insertUserSql, java.sql.Statement.RETURN_GENERATED_KEYS);
+            pstmtUser = connection.prepareStatement(insertUserSql, Statement.RETURN_GENERATED_KEYS);
             pstmtUser.setString(1, user.getName());
             pstmtUser.setString(2, user.getEmail());
             pstmtUser.setString(3, user.getCountry());
@@ -285,7 +285,7 @@ public class UserDAO implements IUserDAO {
 
             if (permissionIds != null && permissionIds.length > 0) {
                 String insertPermissionSql =
-                        "INSERT INTO user_permission (user_id, permission_id) VALUES (?, ?)";
+                        "INSERT INTO user_permission (user_id, permission_id_error) VALUES (?, ?)";
                 pstmtAssignment = connection.prepareStatement(insertPermissionSql);
 
                 for (int permissionId : permissionIds) {
@@ -298,11 +298,7 @@ public class UserDAO implements IUserDAO {
             connection.commit();
         } catch (SQLException e) {
             if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
+                connection.rollback();
             }
             throw e;
         } finally {
